@@ -1,14 +1,4 @@
-const BASE_URL = (() => {
-    const { protocol, hostname, port, origin } = window.location;
-
-    // Local dev: frontend often runs on Live Server (5500), backend on FastAPI (8000)
-    if ((hostname === "127.0.0.1" || hostname === "localhost") && (port === "5500" || port === "5501" || port === "5502")) {
-        return `${protocol}//${hostname}:8000`;
-    }
-
-    // Production (Render same-origin) or other environments
-    return origin.startsWith("http") ? origin : "http://127.0.0.1:8000";
-})();
+const BASE_URL = "https://aia-01.up.railway.app";
 
 let isAdminLoggedIn = false;
 let adminToken = null;
