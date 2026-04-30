@@ -140,13 +140,64 @@ function adminLogout() {
 function renderAdminPanel() {
     document.getElementById("adminSection").innerHTML = `
         <h2>Admin Panel</h2>
-
-        <input id="adminAssignmentId" placeholder="Assignment ID to Delete">
-
-        <button class="admin-action-btn" onclick="deleteResults()">Delete Assignment Data</button>
-
-        <button class="admin-action-btn" onclick="adminLogout()" style="background:#dc2626;">Logout</button>
+        <button class="admin-action-btn" onclick="adminLogout()" style="background:#dc2626; float:right;">Logout</button>
+        <div style="clear:both"></div>
+        <h3 style="margin-top:28px;">Available Assignments</h3>
+        <div id="adminAssignmentsContainer" class="assignment-cards"></div>
     `;
+    fetchAdminAssignments();
+}
+
+function fetchAdminAssignments() {
+    const container = document.getElementById('adminAssignmentsContainer');
+    if (!container) return;
+    container.innerHTML = '<div class="admin-loading">Loading assignments...</div>';
+    fetch(`${BASE_URL}/admin/assignments`, {
+        headers: { 'Authorization': `Bearer ${adminToken}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.assignments || data.assignments.length === 0) {
+            container.innerHTML = '<div class="admin-empty">No assignments found.</div>';
+            return;
+        }
+        container.innerHTML = data.assignments.map(a => renderAssignmentCard(a)).join('');
+    })
+    .catch(() => {
+        container.innerHTML = '<div class="admin-error">Failed to load assignments.</div>';
+    });
+}
+
+function renderAssignmentCard(a) {
+    return `
+    <div class="assignment-card" id="card-${a.assignment_id}">
+        <div class="assignment-id">${a.assignment_id}</div>
+        <div class="assignment-meta">
+            <span>Students: <b>${a.student_count}</b></span>
+            <span>Flagged: <b>${a.flagged_count}</b></span>
+        </div>
+        <button class="delete-btn" onclick="deleteAssignmentCard('${a.assignment_id}')">Delete</button>
+    </div>
+    `;
+}
+
+function deleteAssignmentCard(assignmentId) {
+    if (!confirm(`Delete assignment ${assignmentId}? This cannot be undone.`)) return;
+    fetch(`${BASE_URL}/delete/${assignmentId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${adminToken}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.message && data.message.includes('Deleted')) {
+            showMessage(`Assignment ${assignmentId} deleted.`, 'success');
+            const card = document.getElementById(`card-${assignmentId}`);
+            if (card) card.remove();
+        } else {
+            showMessage(data.error || 'Delete failed', 'error');
+        }
+    })
+    .catch(() => showMessage('Delete failed', 'error'));
 }
 
 /* ================= SUBMIT ================= */

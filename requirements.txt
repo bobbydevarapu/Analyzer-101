@@ -13,6 +13,3 @@ nltk
 sendgrid
 python-multipart
 python-dotenv
-numpy
-pandas
-tqdm
