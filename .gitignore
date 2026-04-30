@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.env
+*.sqlite3
+node_modules/
+__MACOSX/
+.DS_Store
+.idea/
+Datasets/
+backend/logs/

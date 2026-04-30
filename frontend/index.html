@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assignment Integrity Analyzer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="shortcut icon" href="favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Assignment Integrity Analyzer</h1>
+
+    <!-- ROLE -->
+    <div class="card">
+        <label>Select Role</label>
+        <select id="role" onchange="switchRole()">
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+            <option value="admin">Admin</option>
+        </select>
+    </div>
+
+    <!-- STUDENT -->
+    <div id="studentSection" class="card">
+        <h2>Submit Assignment</h2>
+
+        <input id="assignmentId" placeholder="e.g. CSE-01">
+        <input id="roll" placeholder="Roll Number">
+        <input id="email" placeholder="Email">
+        <input type="file" id="file">
+
+        <button onclick="submitAssignment()">Submit</button>
+    </div>
+
+    <!-- TEACHER -->
+    <div id="teacherSection" class="card" style="display:none;">
+        <h2>Analyze</h2>
+
+        <input id="teacherAssignmentId" placeholder="e.g. CSE-01">
+        <small class="field-hint">Enter the assignment ID Correctly</small>
+
+        <div class="teacher-actions">
+            <button onclick="analyze()">Analyze</button>
+            <button onclick="sendEmails()">Send Emails</button>
+        </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="adminSection" class="card" style="display:none;"></div>
+
+    <!-- RESULT -->
+    <div id="result" class="card"></div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
