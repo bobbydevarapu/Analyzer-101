@@ -28,11 +28,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def home():
-    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
-
-
 # ========================
 # 🔹 SUBMIT
 # ========================
