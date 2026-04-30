@@ -1,4 +1,4 @@
-const BASE_URL = "https://aia-01.up.railway.app";
+const BASE_URL = "https://aia-011.up.railway.app";
 
 let isAdminLoggedIn = false;
 let adminToken = null;
