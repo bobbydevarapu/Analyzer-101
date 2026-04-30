@@ -10,8 +10,7 @@ A professional web application for detecting plagiarism and academic integrity v
 ✅ **Email Notifications** - SendGrid integration for flagging students  
 ✅ **Admin Panel** - Manage and delete assignment data  
 ✅ **Responsive UI** - Mobile-friendly dark theme with professional design  
-✅ **Report Download** - Export analysis in JSON/CSV formats  
-✅ **Admin Session Persistence** - localStorage-based login with page refresh support  
+✅ **Report Download** - Export analysis in JSON/CSV formats 
 
 ---
 
