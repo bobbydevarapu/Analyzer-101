@@ -7,12 +7,13 @@ import io
 from fastapi import HTTPException
 import fitz  # PyMuPDF
 
-# Use a cloud-friendly Tesseract path, with local Windows fallback.
-pytesseract.pytesseract.tesseract_cmd = os.getenv(
-    "TESSERACT_CMD",
-    r"D:\Program Files\tesseract\tesseract.exe"
-)
-
+# Detect environment automatically
+if os.name == "nt":
+    # Windows (your local system)
+    pytesseract.pytesseract.tesseract_cmd = r"D:\Program Files\tesseract\tesseract.exe"
+else:
+    # Linux (Render / cloud)
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 def extract_text(file):
     filename = file.filename.lower()
