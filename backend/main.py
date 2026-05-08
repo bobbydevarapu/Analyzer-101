@@ -308,14 +308,30 @@ def admin_assignment_detail(assignment_id: str, authorization: str = Header(None
 
 @app.get("/get-student/{email}")
 def get_student(email: str):
-    return build_student_profile(email)
+    email = (email or "").strip().lower()
+    if not email:
+        raise HTTPException(400, "Email is required")
+
+    try:
+        return build_student_profile(email)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        print(f"❌ Failed to build student profile for {email}: {exc}")
+        raise HTTPException(500, "Failed to load student profile") from exc
 
 def count_student_violations(email: str):
     results = list(results_collection.find({}, {"_id": 0}))
     copied = 0
     violations = []
     for r in results:
-        for pair in r.get("results", []):
+        pairs = r.get("results", [])
+        if not isinstance(pairs, list):
+            continue
+
+        for pair in pairs:
+            if not isinstance(pair, dict):
+                continue
             if pair.get("email1") == email or pair.get("email2") == email:
                 copied += 1
                 violations.append({
@@ -327,6 +343,7 @@ def count_student_violations(email: str):
     return copied, violations
 
 def build_student_profile(email: str):
+    email = (email or "").strip().lower()
     user = users_collection.find_one({"email": email, "role": "student"}, {"_id": 0}) or {}
     submissions = list(submissions_collection.find(
         {"email": email},
@@ -389,7 +406,15 @@ def admin_students(authorization: str = Header(None)):
     students = []
     for user in users_collection.find({"role": "student"}, {"_id": 0}):
         email = user.get("email")
-        profile = build_student_profile(email)
+        if not email:
+            continue
+
+        try:
+            profile = build_student_profile(email)
+        except Exception as exc:
+            print(f"⚠️ Skipping invalid student record {email}: {exc}")
+            continue
+
         students.append({
             "name": profile["name"],
             "email": email,
