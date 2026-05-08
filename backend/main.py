@@ -508,7 +508,7 @@ def favicon():
 async def spa_fallback_middleware(request, call_next):
     path = request.url.path
 
-    api_prefixes = ("/submit", "/teacher", "/student", "/admin", "/auth", "/docs", "/redoc", "/openapi.json")
+    api_prefixes = ("/submit", "/teacher", "/student", "/admin", "/auth", "/get-student", "/docs", "/redoc", "/openapi.json")
     if path.startswith(api_prefixes):
         return await call_next(request)
 
