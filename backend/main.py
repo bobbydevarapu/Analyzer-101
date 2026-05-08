@@ -479,6 +479,26 @@ def favicon():
     from fastapi import Response
     return Response(status_code=204)
 
+@app.middleware("http")
+async def spa_fallback_middleware(request, call_next):
+    path = request.url.path
+
+    api_prefixes = ("/submit", "/teacher", "/student", "/admin", "/auth", "/docs", "/redoc", "/openapi.json")
+    if path.startswith(api_prefixes):
+        return await call_next(request)
+
+    if os.path.exists(FRONTEND_INDEX):
+        candidate_path = os.path.join(BUILT_FRONTEND, path.lstrip("/"))
+
+        # Serve built assets directly so Vite chunk URLs continue to work.
+        if path != "/" and os.path.isfile(candidate_path):
+            return FileResponse(candidate_path)
+
+        # All other browser routes should load the SPA entrypoint.
+        return FileResponse(FRONTEND_INDEX)
+
+    return await call_next(request)
+
 @app.get("/{full_path:path}")
 def frontend_spa(full_path: str = ""):
     if os.path.exists(FRONTEND_INDEX):
