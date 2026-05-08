@@ -10,3 +10,8 @@ __MACOSX/
 .idea/
 Datasets/
 backend/logs/
+frontend/.vite/
+frontend/dist/
+package-lock.json
+frontend/package-lock.json
+frontend/bun.lockb

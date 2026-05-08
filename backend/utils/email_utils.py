@@ -1,78 +1,216 @@
 import os
 import logging
+
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
-# Setup logger
-LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs")
+
+# ==========================================
+# LOGGER SETUP
+# ==========================================
+LOG_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "logs"
+)
+
 os.makedirs(LOG_DIR, exist_ok=True)
-LOG_FILE = os.path.join(LOG_DIR, "email.log")
+
+LOG_FILE = os.path.join(
+    LOG_DIR,
+    "email.log"
+)
+
 logger = logging.getLogger("email_utils")
+
 logger.setLevel(logging.INFO)
+
 if not logger.handlers:
-    fh = logging.FileHandler(LOG_FILE, encoding="utf-8")
-    fh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
-    logger.addHandler(fh)
 
-
-def send_email(to_email, subject, body):
-    """Send an email via SendGrid.
-
-    Raises RuntimeError on configuration or send failure. Returns the
-    SendGrid HTTP status code on success.
-    """
-    api_key = os.getenv("SENDGRID_API_KEY")
-    from_email = os.getenv("FROM_EMAIL", "no-reply@example.com")
-
-    if not api_key:
-        raise RuntimeError("SendGrid API key missing (SENDGRID_API_KEY)")
-
-    sg = SendGridAPIClient(api_key)
-
-    message = Mail(
-        from_email=from_email,
-        to_emails=to_email,
-        subject=subject,
-        html_content=body,
+    # File logger
+    file_handler = logging.FileHandler(
+        LOG_FILE,
+        encoding="utf-8"
     )
 
+    # Console logger
+    stream_handler = logging.StreamHandler()
+
+    formatter = logging.Formatter(
+        "%(asctime)s %(levelname)s %(message)s"
+    )
+
+    file_handler.setFormatter(formatter)
+
+    stream_handler.setFormatter(formatter)
+
+    logger.addHandler(file_handler)
+
+    logger.addHandler(stream_handler)
+
+
+# ==========================================
+# SEND EMAIL FUNCTION
+# ==========================================
+def send_email(
+    to_email,
+    subject,
+    body
+):
+
+    # ==========================================
+    # ENV VARIABLES
+    # ==========================================
+    api_key = os.getenv(
+        "SENDGRID_API_KEY"
+    )
+
+    from_email = os.getenv(
+        "FROM_EMAIL",
+        "no-reply@example.com"
+    )
+
+    logger.info(
+        f"📧 Attempting to send email to: {to_email}"
+    )
+
+    logger.info(
+        f"🔑 API Key present: {bool(api_key)}"
+    )
+
+    logger.info(
+        f"📨 From email: {from_email}"
+    )
+
+    # ==========================================
+    # VALIDATIONS
+    # ==========================================
+    if not api_key:
+
+        logger.error(
+            "❌ SENDGRID_API_KEY is missing"
+        )
+
+        return False
+
+    if (
+        not from_email
+        or from_email == "no-reply@example.com"
+    ):
+
+        logger.error(
+            f"❌ FROM_EMAIL invalid: {from_email}"
+        )
+
+        return False
+
+    # ==========================================
+    # INITIALIZE SENDGRID CLIENT
+    # ==========================================
     try:
-        response = sg.send(message)
-        status = getattr(response, "status_code", None)
-        logger.info(f"SendGrid send to={to_email} subject={subject} status={status}")
-        return status
+
+        sg = SendGridAPIClient(api_key)
+
     except Exception as e:
-        logger.error(f"SendGrid error sending to={to_email} subject={subject} error={e}")
 
-        # Attempt SMTP fallback if configured
-        smtp_host = os.getenv("SMTP_HOST")
-        smtp_port = int(os.getenv("SMTP_PORT", "0") or 0)
-        smtp_user = os.getenv("SMTP_USER")
-        smtp_pass = os.getenv("SMTP_PASS")
+        logger.error(
+            f"❌ Failed to initialize SendGrid client: {e}"
+        )
 
-        if smtp_host and smtp_port and smtp_user and smtp_pass:
-            try:
-                import smtplib
-                from email.message import EmailMessage
+        return False
 
-                msg = EmailMessage()
-                msg["From"] = from_email
-                msg["To"] = to_email
-                msg["Subject"] = subject
-                msg.set_content("This email requires an HTML-capable client.")
-                msg.add_header("Content-Type", "text/html")
-                msg.set_payload(body)
+    # ==========================================
+    # EMAIL CONTENT
+    # ==========================================
+    plain_text = (
+        "Assignment Integrity Analyzer Notification.\n\n"
+        "Please open this email in an HTML-supported "
+        "email client to view the complete report."
+    )
 
-                with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as s:
-                    s.starttls()
-                    s.login(smtp_user, smtp_pass)
-                    s.send_message(msg)
+    # ==========================================
+    # CREATE EMAIL MESSAGE
+    # ==========================================
+    try:
 
-                logger.info(f"SMTP fallback send to={to_email} subject={subject} host={smtp_host}")
-                return 250
-            except Exception as se:
-                logger.error(f"SMTP fallback error to={to_email} error={se}")
-                raise RuntimeError(f"SendGrid failed: {e}; SMTP fallback failed: {se}") from se
+        message = Mail(
+            from_email=from_email,
+            to_emails=to_email,
+            subject=subject,
+            plain_text_content=plain_text,
+            html_content=body
+        )
 
-        # No SMTP fallback configured — re-raise original error
-        raise RuntimeError(f"SendGrid send error: {e}") from e
+    except Exception as e:
+
+        logger.error(
+            f"❌ Failed to create email message: {e}"
+        )
+
+        return False
+
+    # ==========================================
+    # SEND EMAIL
+    # ==========================================
+    try:
+
+        response = sg.send(message)
+
+        status = getattr(
+            response,
+            "status_code",
+            None
+        )
+
+        body_text = getattr(
+            response,
+            "body",
+            b""
+        )
+
+        # Convert bytes → string
+        if isinstance(body_text, bytes):
+
+            body_text = body_text.decode(
+                errors="ignore"
+            )
+
+        # ==========================================
+        # SUCCESS
+        # ==========================================
+        if status == 202:
+
+            logger.info(
+                f"✅ Email sent successfully | "
+                f"to={to_email} | "
+                f"subject={subject} | "
+                f"status={status} | "
+                f"response={body_text}"
+            )
+
+            return True
+
+        # ==========================================
+        # FAILED STATUS
+        # ==========================================
+        logger.error(
+            f"❌ SendGrid returned unexpected status | "
+            f"to={to_email} | "
+            f"status={status} | "
+            f"response={body_text}"
+        )
+
+        return False
+
+    # ==========================================
+    # SENDGRID EXCEPTION
+    # ==========================================
+    except Exception as e:
+
+        logger.error(
+            f"❌ SendGrid exception while sending email | "
+            f"to={to_email} | "
+            f"subject={subject} | "
+            f"error={e}"
+        )
+
+        return False
