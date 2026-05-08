@@ -14,12 +14,16 @@ app = FastAPI(
 
 import logging
 
+# Ensure logs directory exists
+logs_dir = "backend/logs"
+os.makedirs(logs_dir, exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
     handlers=[
         logging.FileHandler(
-            "backend/logs/email.log",
+            f"{logs_dir}/email.log",
             encoding="utf-8"
         ),
         logging.StreamHandler()
