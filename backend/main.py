@@ -1,6 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 import os
@@ -470,6 +469,7 @@ def admin_reset_student_violations(email: str, authorization: str = Header(None)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 BUILT_FRONTEND = os.path.join(FRONTEND_DIR, "dist")
+FRONTEND_INDEX = os.path.join(BUILT_FRONTEND, "index.html")
 
 @app.get("/favicon.ico")
 def favicon():
@@ -479,14 +479,20 @@ def favicon():
     from fastapi import Response
     return Response(status_code=204)
 
-if os.path.exists(os.path.join(BUILT_FRONTEND, "index.html")):
-    app.mount("/", StaticFiles(directory=BUILT_FRONTEND, html=True), name="frontend")
-else:
-    @app.get("/")
-    def dev_root():
-        return {
-            "message": "Frontend not built. Run: cd frontend && npm run dev",
-            "frontend_dev_url": "http://localhost:8081"
-        }
+@app.get("/{full_path:path}")
+def frontend_spa(full_path: str = ""):
+    if os.path.exists(FRONTEND_INDEX):
+        candidate_path = os.path.join(BUILT_FRONTEND, full_path)
+
+        # Serve real build assets directly so Vite chunk URLs keep working.
+        if full_path and os.path.isfile(candidate_path):
+            return FileResponse(candidate_path)
+
+        return FileResponse(FRONTEND_INDEX)
+
+    return {
+        "message": "Frontend not built. Run: cd frontend && npm run dev",
+        "frontend_dev_url": "http://localhost:8081"
+    }
 
 print("🚀 Backend Started Successfully!")
