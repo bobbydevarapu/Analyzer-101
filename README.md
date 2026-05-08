@@ -1,103 +1,266 @@
-# Assignment Integrity Analyzer
+# Assignment Integrity Analyzer (v2)
 
-A professional web application for detecting plagiarism and academic integrity violations in student assignments using machine learning and NLP.
+A professional, full-stack web application for detecting plagiarism and academic integrity violations in student assignments using machine learning and NLP. Built with modern tech stack: React + Vite (frontend) and FastAPI (backend).
 
-## Features
+## ✨ Features
 
-✅ **Student Submission** - Upload assignments in multiple formats (PDF, DOCX, TXT,IMAGES)  
-✅ **AI-Powered Analysis** - TF-IDF + SentenceTransformer embeddings for similarity detection  
-✅ **Teacher Dashboard** - Analyze submissions and review similarity matrix  
-✅ **Email Notifications** - SendGrid integration for flagging students  
-✅ **Admin Panel** - Manage and delete assignment data  
-✅ **Responsive UI** - Mobile-friendly dark theme with professional design  
-✅ **Report Download** - Export analysis in JSON/CSV formats 
+✅ **Student Submission** - Upload assignments in multiple formats (PDF, DOCX, TXT, Images)  
+✅ **AI-Powered Analysis** - SentenceTransformer embeddings + OCR for similarity detection  
+✅ **Teacher Dashboard** - Real-time analysis, violation reports, email notifications  
+✅ **Student Portal** - View results, assignment history, and violation details  
+✅ **Email Notifications** - SendGrid integration for flagging students with violation details  
+✅ **Admin Panel** - Manage users, assignments, and delete analysis data  
+✅ **Mobile-Responsive UI** - Dark theme with Tailwind CSS, Framer Motion animations  
+✅ **Report Export** - Download analysis in JSON/CSV formats  
+✅ **Secure Authentication** - User sessions with token-based auth  
 
 ---
 
-## Tech Stack
+## 🛠 Tech Stack
 
 **Backend:**
-- FastAPI (Python web framework)
-- Uvicorn (ASGI server)
-- MongoDB (NoSQL database)
-- SendGrid (email service)
-- scikit-learn & SentenceTransformer (ML/NLP)
+- **FastAPI** (async Python web framework)
+- **Uvicorn** (ASGI server)
+- **MongoDB** (NoSQL database)
+- **SendGrid** (transactional email)
+- **SentenceTransformers** (semantic similarity)
+- **Pytesseract** (OCR for images)
+- **Docker** (containerization)
 
 **Frontend:**
-- HTML/CSS/JavaScript (Vanilla)
-- Responsive Design (Mobile-first)
-- Toast Notifications
-- Report Export (JSON/CSV)
+- **React 18** (UI library)
+- **Vite** (build tool, fast dev server)
+- **TypeScript** (type-safe JavaScript)
+- **Tailwind CSS** (utility-first styling)
+- **Framer Motion** (animations)
+- **React Router** (client-side routing)
+- **Shadcn/ui** (accessible UI components)
 
 **Deployment:**
-- Docker support
-- Railway/Render/Heroku compatible
-- Environment-based configuration
+- **Vercel** (frontend hosting, free tier)
+- **Fly.io** (backend hosting, free tier)
+- **Docker** (container support)
 
 ---
 
-## Local Setup
+## 🚀 Quick Start (Local Development)
 
 ### Prerequisites
-- Python 3.8+
-- MongoDB (local or Atlas)
-- SendGrid API key
+- Node.js 18+ (for frontend)
+- Python 3.11+ (for backend)
+- MongoDB (local or Atlas cloud)
+- SendGrid API key (optional, for email features)
 
 ### Installation
 
-1. **Clone & Install Dependencies**
+1. **Clone Repository**
 ```bash
+git clone https://github.com/bobbydevarapu/Assignment-Integrity-Analyzer.git
 cd assignment_integrity_analyzer
+git checkout upgrade-v2
+```
+
+2. **Backend Setup**
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate (Windows)
+venv\Scripts\activate
+# Activate (macOS/Linux)
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-2. **Configure Environment**
+3. **Frontend Setup**
 ```bash
-cp .env.example .env
-# Edit .env with your configuration
+cd frontend
+npm install
 ```
 
-3. **Start MongoDB**
+4. **Configure Environment**
 ```bash
-# Local MongoDB
+# Create .env file in project root
+cat > .env << EOF
+SENDGRID_API_KEY=your_sendgrid_api_key_here
+FROM_EMAIL=your_email@gmail.com
+MONGODB_URL=mongodb://localhost:27017/assignment_analyzer
+ADMIN_USER=admin
+ADMIN_PASS=secure_password_here
+ADMIN_TOKEN=admin_token_here
+TESSERACT_CMD=/usr/bin/tesseract
+EOF
+```
+
+5. **Start MongoDB**
+```bash
+# Local MongoDB (if installed)
 mongod
 
-# OR use MongoDB Atlas (cloud)
-# Set MONGODB_URL in .env
+# OR use MongoDB Atlas
+# Update MONGODB_URL in .env with your connection string
 ```
 
-4. **Run Backend**
+6. **Run Backend**
 ```bash
-python -m uvicorn backend.main:app --reload
-# Server runs on http://127.0.0.1:8000
+# From project root (with venv activated)
+python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+# Visit http://127.0.0.1:8000
 ```
 
-5. **Serve Frontend**
+7. **Run Frontend** (in new terminal)
 ```bash
-# Option A: Simple HTTP server
-python -m http.server 5500 --directory frontend
-
-# Option B: Use Live Server extension in VS Code
-# Open frontend/index.html and use Live Server
+cd frontend
+npm run dev
+# Visit http://localhost:5173
 ```
-
-6. **Access App**
-- Open `http://127.0.0.1:5500/frontend/`
 
 ---
 
-## Environment Variables
+## 🌐 Deployment
 
-Create a `.env` file with:
+### Deploy Frontend to Vercel (Free)
 
-```env
-# SendGrid Email Configuration
-SENDGRID_API_KEY=your_sendgrid_api_key
-FROM_EMAIL=noreply@yourdomain.com
+1. Push code to GitHub (`upgrade-v2` branch)
+2. Visit https://vercel.com and sign up
+3. Click "New Project" → Select your GitHub repository
+4. **Settings:**
+   - Framework: `Vite`
+   - Root Directory: `frontend`
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+5. Click "Deploy" — Vercel auto-deploys on push
+6. Get your frontend URL (e.g., `https://yourapp.vercel.app`)
 
-# Admin Authentication
-ADMIN_USER=admin
-ADMIN_PASS=your_secure_password
+### Deploy Backend to Fly.io (Free Tier)
+
+1. Install `flyctl`: https://fly.io/docs/hands-on/install-flyctl/
+2. Sign up at https://fly.io
+3. From project root:
+
+```bash
+# Login
+flyctl auth login
+
+# Launch Fly app
+flyctl launch --name assignment-integrity-analyzer --dockerfile ./Dockerfile --no-deploy
+
+# Set environment secrets
+flyctl secrets set \
+  SENDGRID_API_KEY="your_sendgrid_key" \
+  FROM_EMAIL="your_email@gmail.com" \
+  MONGODB_URL="your_mongodb_url" \
+  ADMIN_USER="admin" \
+  ADMIN_PASS="secure_password" \
+  TESSERACT_CMD="/usr/bin/tesseract"
+
+# Deploy
+flyctl deploy
+```
+
+4. Get your backend URL:
+```bash
+flyctl info
+# URL will be: https://assignment-integrity-analyzer.fly.dev
+```
+
+5. **Update Frontend API URL**
+   - Edit `frontend/src/lib/api.ts`
+   - Update `BASE_URL` to your Fly.io backend URL
+   - Redeploy frontend: `git push` → Vercel auto-deploys
+
+---
+
+## 📋 Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SENDGRID_API_KEY` | Yes | API key from SendGrid dashboard |
+| `FROM_EMAIL` | Yes | Email address for sending notifications |
+| `MONGODB_URL` | Yes | MongoDB connection string |
+| `ADMIN_USER` | Yes | Admin panel username |
+| `ADMIN_PASS` | Yes | Admin panel password |
+| `ADMIN_TOKEN` | Yes | Admin authentication token |
+| `TESSERACT_CMD` | No | Path to tesseract binary (default: `/usr/bin/tesseract`) |
+
+---
+
+## 📖 API Documentation
+
+Once backend is running, visit:
+- **Swagger UI**: http://127.0.0.1:8000/docs
+- **ReDoc**: http://127.0.0.1:8000/redoc
+
+Key endpoints:
+- `POST /teacher/analyze` - Analyze submitted assignments
+- `GET /teacher/reports` - Fetch analysis reports
+- `POST /teacher/send/{assignment_id}` - Send violation emails
+- `GET /student/dashboard` - Student dashboard data
+- `POST /student/login` - Student authentication
+
+---
+
+## 🔐 Security Notes
+
+- **Rotate `SENDGRID_API_KEY`** regularly in production
+- Never commit `.env` to version control
+- Use strong passwords for `ADMIN_PASS`
+- Enable HTTPS on production deployments
+- Update `TESSERACT_CMD` path based on your system
+
+---
+
+## 🐛 Troubleshooting
+
+**Frontend not loading on Vercel:**
+- Ensure `upgrade-v2` branch is set in Vercel project settings
+- Check build logs: Vercel Dashboard → Project → Deployments → View Logs
+
+**Backend not connecting on Fly.io:**
+- Verify environment secrets: `flyctl secrets list`
+- Check logs: `flyctl logs`
+- Ensure MongoDB URL is accessible from Fly.io VM
+
+**Emails not sending:**
+- Verify SendGrid API key is valid
+- Check SendGrid dashboard for suppressed email addresses
+- Ensure `FROM_EMAIL` is verified in SendGrid
+
+**Model download timeout:**
+- SentenceTransformer model (~100MB) downloads on first startup
+- Increase Fly.io instance size if memory is insufficient
+- Or use an embeddings API service to reduce overhead
+
+---
+
+## 📝 License
+
+MIT License — see LICENSE file for details
+
+---
+
+## 👨‍💻 Contributing
+
+Contributions welcome! Please:
+1. Create a feature branch: `git checkout -b feature/your-feature`
+2. Commit changes: `git commit -m "Add feature"`
+3. Push: `git push origin feature/your-feature`
+4. Open a Pull Request
+
+---
+
+## 📧 Support
+
+For issues or questions:
+- Create an issue on GitHub
+- Contact: bobbydevarapu@gmail.com
+
+---
+
+**Version**: 2.0 (upgrade-v2)  
+**Last Updated**: May 2026
 ADMIN_TOKEN=your_secure_token
 
 # MongoDB Connection (local or cloud)
