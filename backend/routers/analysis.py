@@ -434,44 +434,82 @@ def build_violation_email(
         status,
         teacher_email: str | None = None,
 ):
-        teacher_block = (
-                f"<div style='background:#f0f9ff;border:1px solid #bae6fd;border-radius:14px;padding:16px 18px;color:#0369a1;font-size:13px;margin-bottom:24px'><strong>Instructor:</strong> {teacher_email}</div>"
-                if teacher_email
-                else ""
-        )
+        try:
+                score_value = f"{float(score):.1f}%"
+        except (TypeError, ValueError):
+                score_value = f"{score}%"
 
-        return f"""
-<div style="font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;padding:24px;color:#0f172a;line-height:1.6">
-    <div style="max-width:720px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(15,23,42,.08)">
-        <div style="background:linear-gradient(135deg,#0f172a 0%,#111827 52%,#1f2937 100%);padding:28px 32px;color:#ffffff">
-            <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#fbbf24;margin-bottom:10px">Assignment Integrity Analyzer</div>
-            <h1 style="margin:0;font-size:30px;line-height:1.2;">Academic Integrity Review Notice</h1>
-        </div>
-        <div style="padding:32px">
-            <p style="margin:0 0 16px 0;">Dear {student_roll or 'Student'},</p>
-            <p style="margin:0 0 24px 0;color:#334155;">Our system identified a similarity concern in one of the submitted responses for the assignment below. This notice is being shared with you so you can review the matter and contact your instructor for clarification.</p>
-            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:18px 20px;margin-bottom:24px">
-                <table style="width:100%;border-collapse:collapse;font-size:14px">
-                    <tr>
-                        <td style="padding:10px 0;color:#64748b;width:42%;">Assignment</td>
-                        <td style="padding:10px 0;font-weight:700;color:#0f172a;">{assignment_id}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding:10px 0;color:#64748b;">Similarity Score</td>
-                        <td style="padding:10px 0;font-weight:700;color:#b91c1c;">{score}%</td>
-                    </tr>
-                    <tr>
-                        <td style="padding:10px 0;color:#64748b;">Status</td>
-                        <td style="padding:10px 0;font-weight:700;color:#0f172a;">{status}</td>
-                    </tr>
-                </table>
+        status_value = status or "Highly Similar"
+        teacher_value = teacher_email or "Not provided"
+
+        return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        @media only screen and (max-width: 600px) {{
+            .email-shell {{ padding: 12px !important; }}
+            .email-card {{ border-radius: 16px !important; }}
+            .email-header {{ padding: 22px 18px !important; }}
+            .email-title {{ font-size: 24px !important; line-height: 1.15 !important; }}
+            .email-body {{ padding: 20px 16px !important; }}
+            .email-label, .email-value {{ display: block !important; width: 100% !important; }}
+            .email-label {{ padding: 10px 0 4px 0 !important; }}
+            .email-value {{ padding: 0 0 12px 0 !important; }}
+            .email-row {{ display: block !important; }}
+            .email-table {{ border-spacing: 0 !important; }}
+            .email-note, .email-instructor {{ font-size: 13px !important; line-height: 1.55 !important; }}
+        }}
+    </style>
+</head>
+<body style="margin:0;padding:0;background:#f3f4f6;color:#0f172a;font-family:Arial,Helvetica,sans-serif;line-height:1.6;">
+    <div class="email-shell" style="padding:24px;">
+        <div class="email-card" style="max-width:720px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(15,23,42,.08);">
+            <div class="email-header" style="background:linear-gradient(135deg,#0f172a 0%,#111827 52%,#1f2937 100%);padding:28px 32px;color:#ffffff;">
+                <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#fbbf24;margin-bottom:10px;">Assignment Integrity Analyzer</div>
+                <h1 class="email-title" style="margin:0;font-size:30px;line-height:1.2;">Academic Integrity Review Notice</h1>
             </div>
-            <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:16px 18px;color:#9a3412;font-size:13px;margin-bottom:24px">Please review this notification carefully. If you have questions or believe this is an error, contact your instructor.</div>
-            {teacher_block}
-            <p style="margin:0;color:#666;font-size:12px;margin-top:24px">This is an automated message from the Assignment Integrity Analyzer. Do not reply to this email.</p>
+
+            <div class="email-body" style="padding:32px;">
+                <p style="margin:0 0 16px 0;font-size:15px;">Dear {student_roll or 'Student'},</p>
+
+                <p style="margin:0 0 24px 0;color:#334155;font-size:15px;">
+                    Our system identified a similarity concern in one of the submitted responses for the assignment below. This notice is being shared with you so you can review the matter and contact your instructor for clarification.
+                </p>
+
+                <div style="margin-bottom:24px;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;background:#f8fafc;">
+                    <div style="padding:14px 18px;background:#eef2ff;color:#334155;font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;">Results Summary</div>
+                    <table class="email-table" role="presentation" style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">
+                        <tr class="email-row">
+                            <td class="email-label" style="width:38%;padding:14px 18px;border-top:1px solid #e2e8f0;color:#64748b;font-size:14px;">Assignment</td>
+                            <td class="email-value" style="padding:14px 18px;border-top:1px solid #e2e8f0;font-size:15px;font-weight:700;color:#0f172a;word-break:break-word;">{assignment_id}</td>
+                        </tr>
+                        <tr class="email-row">
+                            <td class="email-label" style="width:38%;padding:14px 18px;border-top:1px solid #e2e8f0;color:#64748b;font-size:14px;">Similarity Score</td>
+                            <td class="email-value" style="padding:14px 18px;border-top:1px solid #e2e8f0;font-size:15px;font-weight:700;color:#b91c1c;word-break:break-word;">{score_value}</td>
+                        </tr>
+                        <tr class="email-row">
+                            <td class="email-label" style="width:38%;padding:14px 18px;border-top:1px solid #e2e8f0;color:#64748b;font-size:14px;">Status</td>
+                            <td class="email-value" style="padding:14px 18px;border-top:1px solid #e2e8f0;font-size:15px;font-weight:700;color:#0f172a;word-break:break-word;">{status_value}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="email-note" style="background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:16px 18px;color:#9a3412;font-size:13px;margin-bottom:20px;">
+                    Please review this notification carefully. If you have questions or believe this is an error, contact your instructor.
+                </div>
+
+                <div class="email-instructor" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:14px;padding:16px 18px;color:#0369a1;font-size:13px;margin-bottom:24px;word-break:break-word;">
+                    <strong>Instructor:</strong> {teacher_value}
+                </div>
+
+                <p style="margin:0;color:#64748b;font-size:12px;">This is an automated message from the Assignment Integrity Analyzer. Do not reply to this email.</p>
+            </div>
         </div>
     </div>
-</div>
+</body>
+</html>
 """
 
 @router.post("/send/{assignment_id}")
