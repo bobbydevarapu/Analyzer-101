@@ -7,7 +7,7 @@ import CanvasCursor from "../components/landing/CanvasCursor";
 
 const API_BASE =
   import.meta.env.VITE_BACKEND_URL ||
-  "https://aia-101.up.railway.app";
+  "https://aia-010.up.railway.app";
 
 const Signup = () => {
   const navigate = useNavigate();

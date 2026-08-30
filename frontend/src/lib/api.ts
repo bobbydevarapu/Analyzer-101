@@ -1,6 +1,6 @@
 const BASE_URL =
   import.meta.env.VITE_BACKEND_URL ||
-  "https://aia-101.up.railway.app";
+  "https://aia-010.up.railway.app";
 
 // ========================================
 // HANDLE RESPONSE

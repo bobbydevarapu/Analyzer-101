@@ -8,7 +8,7 @@ import { useAuth } from "../context/AuthContext";
 
 const API_BASE =
   import.meta.env.VITE_BACKEND_URL ||
-  "https://aia-101.up.railway.app";
+  "https://aia-010.up.railway.app";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -146,10 +146,9 @@ const Login = () => {
                 type="button"
                 onClick={() => setRole(r)}
                 className={`relative z-10 flex-1 py-2 sm:py-3 text-[10px] sm:text-xs uppercase tracking-widest font-medium transition-all
-                  ${
-                    role === r
-                      ? "text-white"
-                      : "text-muted-foreground hover:text-white"
+                  ${role === r
+                    ? "text-white"
+                    : "text-muted-foreground hover:text-white"
                   }`}
               >
                 {r}
@@ -208,10 +207,9 @@ const Login = () => {
         <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50">
           <div
             className={`px-4 sm:px-6 py-3 sm:py-4 rounded-xl backdrop-blur-lg border shadow-lg text-xs sm:text-sm
-              ${
-                toast.type === "success"
-                  ? "bg-green-500/10 border-green-500/30 text-green-400"
-                  : "bg-red-500/10 border-red-500/30 text-red-400"
+              ${toast.type === "success"
+                ? "bg-green-500/10 border-green-500/30 text-green-400"
+                : "bg-red-500/10 border-red-500/30 text-red-400"
               }`}
           >
             {toast.text}
